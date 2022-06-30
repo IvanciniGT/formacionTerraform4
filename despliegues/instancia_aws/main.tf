@@ -63,6 +63,81 @@ resource "null_resource" "ejecutor" {
 }
 
 resource "aws_key_pair" "clave_aws" {
-  key_name   = "clave-tf-ivan"
+  key_name   = "clave-tf-${var.nombreDespliegue}"
   public_key = tls_private_key.mis_claves.public_key_openssh
+}
+
+
+# Generar un security group que:
+# Entrante: 22 y 80
+# Saliente a todos los sitios
+
+resource "aws_security_group" "mi_security_group" {
+  name        = "securitygroup-tf-${var.nombreDespliegue}"
+  vpc_id      = null
+
+  ingress {
+    description      = "Aceptar ssh"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = [ "0.0.0.0/0" ]
+  }
+
+  ingress {
+    description      = "Aceptar http"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = [ "0.0.0.0/0" ]
+  }
+  
+  ingress {
+    description      = "Aceptar https"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = [ "0.0.0.0/0" ]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "securitygroup-tf-${var.nombreDespliegue}"
+  }
+}
+
+
+data "aws_ami" "imagen_so" {
+  most_recent      = true
+  owners           = ["099720109477"]
+
+  filter {
+    name   = "name"
+    values = [ "*ubuntu-xenial-16.04-amd64-server-*" ]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+
+
+resource "aws_instance" "maquina" {
+  ami           = "ami-01963b791a3b02b6d"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "PruebaTF_Ivan" #instancia-tf-NOMBRE
+  }
+  
+  #securityGroup
+  #Clave
 }

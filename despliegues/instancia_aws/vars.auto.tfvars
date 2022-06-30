@@ -6,3 +6,5 @@ ficherosClave  = {
 }
 
 borrarFicherosDeClavesAlDestruir = true
+
+nombreDespliegue = "Ivan"
