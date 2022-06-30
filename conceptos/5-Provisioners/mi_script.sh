@@ -1,0 +1,2 @@
+echo HOLA DESDE EL CONTENEDOR
+echo ESCRIBO EN UN FICHERO > /tmp/fichero.txt
