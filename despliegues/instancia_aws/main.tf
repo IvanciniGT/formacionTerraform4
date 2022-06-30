@@ -28,16 +28,31 @@ provider "null" {
 # Cutre: contraseña
 # Seria: claves ******* Publica/Privada
 
+data "aws_ec2_instance_type" "comprobacion_tipo_instancia" {
+  instance_type = var.tipoInstancia
+}
+
+
+resource "null_resource" "comprobador" {
+    triggers = {
+      trigger = data.aws_ec2_instance_type.comprobacion_tipo_instancia.id
+    
+    }
+     provisioner "local-exec" {
+      command =  "echo La instancia es: ${data.aws_ec2_instance_type.comprobacion_tipo_instancia.id}" 
+     }
+}
+
 resource "tls_private_key" "mis_claves" {
     algorithm = "RSA"
     rsa_bits  = 4096
     
   #local-exec que grabe las claves a un fichero
     provisioner "local-exec" {
-        command = "echo '${self.private_key_pem}' > ${var.ficherosClave.privada}"
+        command = "echo '${self.private_key_pem}' > ${var.ficherosClave.privada} && chmod 600 ${var.ficherosClave.privada}"
     }
     provisioner "local-exec" {
-        command = "echo '${self.public_key_pem}' > ${var.ficherosClave.publica}"
+        command = "echo '${self.public_key_pem}' > ${var.ficherosClave.publica}  && chmod 600 ${var.ficherosClave.publica}"
     }
    
 }
@@ -131,13 +146,38 @@ data "aws_ami" "imagen_so" {
 
 
 resource "aws_instance" "maquina" {
-  ami           = "ami-01963b791a3b02b6d"
-  instance_type = "t2.micro"
-
+  ami             = data.aws_ami.imagen_so.id
+  instance_type   = data.aws_ec2_instance_type.comprobacion_tipo_instancia.id
+  security_groups = [ aws_security_group.mi_security_group.name ]
+                      # Nos da relación de dependencia / ORDEN EN LA EJECUCION
+  key_name        =  aws_key_pair.clave_aws.id
+  
+#  PROBLEMON !!!! NO HACER JAMAS EN LA VIDA BAJO RIESGO DE MUTILACION 
+  #  security_groups = [ "securitygroup-tf-${var.nombreDespliegue}" ] # Esto funciona? MALAMENTE !!
+  # AQUI NO HAY RELACION DE DEPENDENCIA
+  
   tags = {
-    Name = "PruebaTF_Ivan" #instancia-tf-NOMBRE
+    Name = "instancia-tf-${var.nombreDespliegue}"
   }
   
-  #securityGroup
-  #Clave
+}
+
+resource "null_resource" "probador" {
+  count = var.probarConexion ? 1 : 0
+  
+  triggers = {
+      trigger = aws_instance.maquina.public_ip
+  }
+    
+  connection {
+    host = aws_instance.maquina.public_ip
+    type = "ssh"
+    port = 22
+    user = "ubuntu"
+    private_key = tls_private_key.mis_claves.private_key_pem
+  }
+  
+  provisioner "remote-exec" {
+    inline = [ "echo HOLA DESDE AMAZON !!! soy tu nuevo servidor ;)" ]
+  }
 }

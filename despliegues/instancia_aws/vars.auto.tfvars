@@ -8,3 +8,7 @@ ficherosClave  = {
 borrarFicherosDeClavesAlDestruir = true
 
 nombreDespliegue = "Ivan"
+
+tipoInstancia =  "t2.micro"
+
+probarConexion = true
