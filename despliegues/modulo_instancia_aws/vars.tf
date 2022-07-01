@@ -73,11 +73,11 @@ variable "probarConexion" {
 locals {
     # CHAPUZA !!!!!! YA que terraform no permite referenciar a una variable desde otra en el bloque VARIABLE
     validacion_clave_ssh_en_funcion_de_prueba_conexion = (var.probarConexion 
-                                ? (var.ficheroClavePEMPrivada == null
+                                ? (var.clavePEMPrivada == null
                                     ? tobool("No me has pasado la clave SSH Pringao!!!") # Esto corta el pragrama
                                     : true # "FEDERICO"
                                     )
-                                :  (var.ficheroClavePEMPrivada != null
+                                :  (var.clavePEMPrivada != null
                                     ? tobool("Me has pasado la clave SSH y no estas pidiento una prueba de conexión, más Pringao!!!") # Esto corta el pragrama
                                     : true # "FEDERICO"
                                     )

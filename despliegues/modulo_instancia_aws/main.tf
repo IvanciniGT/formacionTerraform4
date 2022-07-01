@@ -116,7 +116,7 @@ resource "null_resource" "probador" {
     port = 22
     user = "ubuntu"
     #private_key = file( var.ficheroClavePEMPrivada )
-    private_key = var.ficheroClavePEMPrivada
+    private_key = var.clavePEMPrivada
   }
   
   provisioner "remote-exec" {

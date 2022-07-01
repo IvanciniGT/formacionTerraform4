@@ -23,3 +23,20 @@ variable "generarNuevasClaves" {
     nullable = false
     default = true
 }
+
+
+variable "regionAWS" {
+
+    type = string 
+    
+    description = "Region de amazon donde desplegar"
+    
+    validation {
+        condition     = can(regex("^[a-z]{2}-[a-z]+-[1-9]$", var.regionAWS))
+        error_message = "La región suministrada no es válida."
+    }
+    
+    nullable = false
+    
+    default  = "eu-west-1"
+}

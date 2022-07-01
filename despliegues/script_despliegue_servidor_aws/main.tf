@@ -36,13 +36,13 @@ locals {
     #claveSSHPublica = file(var.ficherosClave.publica)
     claveSSHPublica = ( 
                         var.generarNuevasClaves 
-                        ? module.claves_conexion.par_claves.public_key_openssh 
+                        ? module.claves_conexion[0].par_claves.public_key_openssh 
                         : file(var.ficherosClave.publica)
                         )
 }
 
 module "instancia" {
-  source = "git::https://github.com/IvanciniGT/terraform_modulo_instancia_aws.git?ref=v1"
+  source = "git::https://github.com/IvanciniGT/terraform_modulo_instancia_aws.git?ref=v3"
   
   #claveSSHPublica = file(var.ficherosClave.publica)
   #claveSSHPublica = ( 
@@ -52,10 +52,12 @@ module "instancia" {
   #                  )
   claveSSHPublica = local.claveSSHPublica
   # mas cosas de configuración
-  
+  nombreDespliegue = "Ivancete"
+  probarConexion = false
+
   # Esto me asegura que el modulo de abajo se ejecute despues del modulo de arriba
-  depends_on { # Tanto en modulos como en resources, solo si no hay una variable
+  depends_on = [ # Tanto en modulos como en resources, solo si no hay una variable
                # digna que me permita crear la dependia autoamtica
       module.claves_conexion
-  }
+  ]
 }
