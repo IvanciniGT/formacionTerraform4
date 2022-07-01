@@ -1,63 +1,47 @@
 
-variable "regionAWS" {
-
-    type = string 
-    
-    description = "Region de amazon donde desplegar"
-    
-    validation {
-        condition     = can(regex("^[a-z]{2}-[a-z]+-[1-9]$", var.regionAWS))
-        error_message = "La región suministrada no es válida."
-    }
-    
+variable "claveSSHPublica" {
+    type = string
+    description = "La clave publica en formato SSH-RSA"
     nullable = false
-    
-    default  = "eu-west-1"
 }
 
-variable "ficherosClave" {
-
-    type = object({
-        privada       = string 
-        publica       = string
-    })
-    
-    description = "Ficheros donde guardar las claves"
-    
-    validation  {
-        condition = length(
-                        regexall("^[/]?([A-Za-z0-9_.-]+[/]?)*[.]pem$",
-                                 var.ficherosClave.privada )
-                    ) == 1 
-        error_message = "La ruta del host para la clave privada no es válida"
-    }
-    
-    validation  {
-        condition = length(
-                        regexall("^[/]?([A-Za-z0-9_.-]+[/]?)*[.]pem$",
-                                 var.ficherosClave.publica )
-                    ) == 1 
-        error_message = "La ruta del host para la clave publica no es válida"
-    }
-    
-    nullable = false
-    
-    default  = {
-        privada = "clave-privada.pem"
-        publica = "clave-publica.pem"
-    }
-    
+variable "clavePEMPrivada" {
+    type = string
+    description = "La clave publica en formato PEM"
+    nullable = true
+    default = null
 }
 
-
-# Borrar claves on destroy
-
-variable "borrarFicherosDeClavesAlDestruir" {
-    type = bool
-    description = "Borrar los ficheros de claves ssh al destruir la infraestructura"
-    nullable = false
-    default = false
-}
+#variable "ficheroClaveSSHPublica" {
+#    type = string
+#    description = "Fichero con la clave publica en formato SSH-RSA"
+#    nullable = false
+#    
+#    validation  {
+#        condition = length(
+#                        regexall("^[/]?([A-Za-z0-9_.-]+[/]?)*[.]rsa$",
+#                                 var.ficheroClaveSSHPublica )
+#                    ) == 1 
+#        error_message = "La ruta del host para la clave publica ssh no es válida"
+#    }
+#}
+#
+#variable "ficheroClavePEMPrivada" {
+#    type = string
+#    description = "Fichero con la clave privada en formato PEM"
+#    nullable = true
+#    default = null
+#    
+#    validation  {
+#        condition = var.ficheroClavePEMPrivada == null ? true :
+#                    length(
+#                        regexall("^[/]?([A-Za-z0-9_.-]+[/]?)*[.]pem$",
+#                                 var.ficheroClavePEMPrivada )
+#                    ) == 1 
+#        error_message = "La ruta del host para la clave private ssh no es válida"
+#    }
+#    sensitive = true
+#}
 
 variable "nombreDespliegue" {
     type = string
@@ -65,6 +49,7 @@ variable "nombreDespliegue" {
     nullable = false
     default = false
 }
+
 variable "tipoInstancia" {
     type = string
     description = "Tipo de instancia a crear"
@@ -83,4 +68,19 @@ variable "probarConexion" {
     description = "Hace una prueba de conexion con la maquina"
     nullable = false
     default = true
+}
+
+locals {
+    # CHAPUZA !!!!!! YA que terraform no permite referenciar a una variable desde otra en el bloque VARIABLE
+    validacion_clave_ssh_en_funcion_de_prueba_conexion = (var.probarConexion 
+                                ? (var.ficheroClavePEMPrivada == null
+                                    ? tobool("No me has pasado la clave SSH Pringao!!!") # Esto corta el pragrama
+                                    : true # "FEDERICO"
+                                    )
+                                :  (var.ficheroClavePEMPrivada != null
+                                    ? tobool("Me has pasado la clave SSH y no estas pidiento una prueba de conexión, más Pringao!!!") # Esto corta el pragrama
+                                    : true # "FEDERICO"
+                                    )
+                                )
+
 }

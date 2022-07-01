@@ -4,34 +4,16 @@ terraform {
             source  = "hashicorp/aws"
             version = "~> 4.0"
         }
-        tls = {
-            source = "hashicorp/tls"
-            version = "3.4.0"
-        }
+
         null = {
             source = "hashicorp/null" 
         }
     }
 }
 
-provider "aws" {
-    region = var.regionAWS
-}
-provider "tls" {
-  # Configuration options
-}
-provider "null" {
-  # Configuration options
-}
-# Crear una maquina Linux
-# Para conectar con ssh:
-# Cutre: contraseña
-# Seria: claves ******* Publica/Privada
-
 data "aws_ec2_instance_type" "comprobacion_tipo_instancia" {
   instance_type = var.tipoInstancia
 }
-
 
 resource "null_resource" "comprobador" {
     triggers = {
@@ -43,49 +25,11 @@ resource "null_resource" "comprobador" {
      }
 }
 
-resource "tls_private_key" "mis_claves" {
-    algorithm = "RSA"
-    rsa_bits  = 4096
-    
-  #local-exec que grabe las claves a un fichero
-    provisioner "local-exec" {
-        command = "echo '${self.private_key_pem}' > ${var.ficherosClave.privada} && chmod 600 ${var.ficherosClave.privada}"
-    }
-    provisioner "local-exec" {
-        command = "echo '${self.public_key_pem}' > ${var.ficherosClave.publica}  && chmod 600 ${var.ficherosClave.publica}"
-    }
-   
-}
-
-
-resource "null_resource" "ejecutor" {
-    triggers = {
-    # Nos da relación de dependencia / ORDEN EN LA EJECUCION
-    # Que solo se ejecuta si hay cambio en los contenedores
-        mi_trigger = tls_private_key.mis_claves.id
-        BORRAR = var.borrarFicherosDeClavesAlDestruir
-        FICHERO_PUBLICA = var.ficherosClave.publica
-        FICHERO_PRIVADA = var.ficherosClave.privada
-    }
-     provisioner "local-exec" {
-        command = "${self.triggers.BORRAR} && rm ${self.triggers.FICHERO_PUBLICA} || exit 0"
-        when = destroy
-    }
-     provisioner "local-exec" {
-        command = "${self.triggers.BORRAR} && rm ${self.triggers.FICHERO_PRIVADA} || exit 0"
-        when = destroy
-    }
-}
-
 resource "aws_key_pair" "clave_aws" {
   key_name   = "clave-tf-${var.nombreDespliegue}"
-  public_key = tls_private_key.mis_claves.public_key_openssh
+#  public_key = file( var.ficheroClaveSSHPublica )
+  public_key = var.claveSSHPublica
 }
-
-
-# Generar un security group que:
-# Entrante: 22 y 80
-# Saliente a todos los sitios
 
 resource "aws_security_group" "mi_security_group" {
   name        = "securitygroup-tf-${var.nombreDespliegue}"
@@ -127,7 +71,6 @@ resource "aws_security_group" "mi_security_group" {
   }
 }
 
-
 data "aws_ami" "imagen_so" {
   most_recent      = true
   owners           = ["099720109477"]
@@ -142,8 +85,6 @@ data "aws_ami" "imagen_so" {
     values = ["hvm"]
   }
 }
-
-
 
 resource "aws_instance" "maquina" {
   ami             = data.aws_ami.imagen_so.id
@@ -174,7 +115,8 @@ resource "null_resource" "probador" {
     type = "ssh"
     port = 22
     user = "ubuntu"
-    private_key = tls_private_key.mis_claves.private_key_pem
+    #private_key = file( var.ficheroClavePEMPrivada )
+    private_key = var.ficheroClavePEMPrivada
   }
   
   provisioner "remote-exec" {

@@ -59,4 +59,51 @@ Propietario: Leer y escribir el fichero
 Grupo y otros -> NADA !!!!
 
 
+Script
+    - configurar el proveedor de amazon
 
+    Modulo que crea claves
+        Variables de entrada
+            fichero
+            Si los borra
+        Datos de salida
+            clave
+        
+    Modulo que crea instancia
+        Variables de entrada
+            claves
+        Datos de salida
+
+
+El modulo que crea la instancia en AWS
+    - Verificar imagen
+    - Crea un security group
+    - Da de alta la clave publica en AWS
+    - Crea la instancia
+        - Security group
+        - clave publica
+    - Prueba la conexión ?????? Opcionalmente
+        - Clave privada      ?? Opcionalmente
+        
+        
+Bloques de primer nivel en terraform:
+- terraform
+- provider
+- resources
+- data
+- variable
+- output
+- locals
+    Locals permite definir variables internas al programa
+
+
+Crear unos recursos
+    Y si estan bien
+    Tengo que esperar a que unos programas dentro de un servidor se arranquen
+Creo otros
+
+Servidor 1 - Cree ... y esta operativo? 
+    Imagen que lleva unos programas ya instaaldos
+    
+    bash... sleep 
+Servidor 2.... esperar al servidor 1
