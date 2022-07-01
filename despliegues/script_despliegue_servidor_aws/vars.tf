@@ -1,12 +1,9 @@
 variable "ficherosClave" {
-
     type = object({
         privada       = string 
         publica       = string
     })
-    
     description = "Ficheros donde guardar las claves"
-
     nullable = false
 }
 

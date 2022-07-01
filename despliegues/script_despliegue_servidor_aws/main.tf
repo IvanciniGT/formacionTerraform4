@@ -25,7 +25,7 @@ provider "null" {
 }
 
 module "claves_conexion" {
-  source = "https://github.com/IvanciniGT/terraform_modulo_claves_ssh/releases/tag/v1"
+  source = "git::https://github.com/IvanciniGT/terraform_modulo_claves_ssh.git?ref=v1"
   
   ficherosClave = var.ficherosClave
   borrarFicherosDeClavesAlDestruir = var.borrarFicherosDeClavesAlDestruir
