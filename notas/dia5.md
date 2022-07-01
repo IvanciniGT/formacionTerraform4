@@ -107,3 +107,19 @@ Servidor 1 - Cree ... y esta operativo?
     
     bash... sleep 
 Servidor 2.... esperar al servidor 1
+
+
+
+Recursos o Modulos que generen varios objetos
+    count <= numero
+            Que variable tengo : count.index
+    foreach <= map
+            Que variable me da:  each.key
+                                 each.value
+
+Generar varios BLOCK dentro un modulo o un resource
+    dynamic "ports" {
+        foreach <= lista, set (Algo sobre lo que iterar)
+    }
+
+                
